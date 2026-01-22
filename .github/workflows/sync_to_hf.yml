@@ -26,4 +26,18 @@ jobs:
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
+          # Remove the folders Hugging Face does not want (but GitHub will keep)
+          rm -rf assets/
+          rm -rf reports/
+        
+          # Tell git these files are gone for this specific push
+          git add -A
+          
+          # Create a temporary commit for the sync
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git commit -m "Clean push to HF: removing assets and reports"
+        
+          # Push to HF
+          git branch -M main
           git push --force https://lxtung95:$HF_TOKEN@huggingface.co/lxtung95/lyricloop-llm main

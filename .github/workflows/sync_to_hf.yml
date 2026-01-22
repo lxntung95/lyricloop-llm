@@ -26,18 +26,23 @@ jobs:
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
+          # Create a temporary git identity
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+
           # Remove the folders Hugging Face does not want (but GitHub will keep)
           rm -rf assets/
           rm -rf reports/
+
+          # Delete temporary runner's git history
+          rm -rf .git/
         
-          # Tell git these files are gone for this specific push
-          git add -A
-          
-          # Create a temporary commit for the sync
-          git config user.name "github-actions"
-          git config user.email "actions@github.com"
-          git commit -m "Clean push to HF: removing assets and reports"
-        
-          # Push to HF
+          # Reinitialize a brand new history for HF (does not affect GitHub)
+          git init
+          git lfs install
+          git add .
+          git commit -m "Clean sync: code and weights only."
+
+          # Push flat history to HF
           git branch -M main
           git push --force https://lxtung95:$HF_TOKEN@huggingface.co/lxtung95/lyricloop-llm main
